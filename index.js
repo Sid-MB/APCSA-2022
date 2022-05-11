@@ -6,7 +6,7 @@ submitButton.addEventListener("click", submit);
 textArea.addEventListener("paste", paste);
 
 function submit() {
-	let gradingPeriodName = output.querySelector(".td-content-wrapper > .title").childNodes[0];
+	let gradingPeriodName = output.querySelector(".td-content-wrapper > .title").childNodes[0].textContent;
 	console.log(gradingPeriodName);
 
 	// let categoryNames = output.querySelectorAll()
@@ -26,14 +26,14 @@ function submit() {
 				{
 					title: "",
 					score: 0,
-					outOf: 0
+					outOf: 0,
 				},
 			],
 		},
 	];
 
 	//allTitles.shift()
-	allTitles = allTitles.filter((t) => (t.textContent !== "(no grading period)"))
+	allTitles = allTitles.filter((t) => t.textContent !== "(no grading period)" && t.textContent !== gradingPeriodName);
 	allTitles.forEach((e) => {
 		console.log(e)
 		if (e.childNodes.length == 0) {
