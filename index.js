@@ -68,8 +68,36 @@ function submit() {
 	});
 
 	console.log(gradebook);
+	generateSpreadsheet(gradebook)
 }
 
+function generateSpreadsheet(gradebook) {
+	const headerRow = document.createElement("tr")
+	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Total Points"]
+		headerTitles.forEach((text) => {
+		const cell = document.createElement("th")
+		cell.textContent = text
+		headerRow.appendChild(cell)
+	})
+	const bodyRows = []
+	gradebook.forEach((section) => {
+		const sectionRow = document.createElement("tr")
+		sectionRow.innerHTML = `<td>${section.sectionName}</td>`
+		sectionRow.innerHTML += `<td>${section.weight}</td>`
+		const assignmentRows = []
+		section.assignments.forEach((a) => {
+			const row = document.createElement("tr")
+			row.innerHTML = `<td>&nbsp;</td><td>&nbsp;</td><td>${a.title}</td><td>${a.score}</td><td>${a.outOf}</td>`;
+			assignmentRows.push(row)
+		})
+		bodyRows.push(sectionRow, ...assignmentRows)
+	})
+	const table = document.createElement("table")
+	table.appendChild(headerRow)
+	bodyRows.forEach(r => table.appendChild(r))
+
+	document.body.appendChild(table)
+}
 function paste(event) {
 	let paste = (event.clipboardData || window.clipboardData).getData("text/html");
 
