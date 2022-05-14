@@ -76,36 +76,17 @@ function submit() {
 function generateSpreadsheet(gradebook) {
 	const headerRow = document.createElement("tr");
 	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum"];
-	headerTitles.forEach((text) => {
-		const cell = document.createElement("th");
-		cell.textContent = text;
-		headerRow.appendChild(cell);
-	});
-	const bodyRows = [];
 
+	const bodyRows = [headerTitles];
 	gradebook.forEach((section) => {
-		const sectionRow = document.createElement("tr");
-		sectionRow.innerHTML = `<td>${section.name}</td>`;
-		sectionRow.innerHTML += `<td>${section.weight}</td>`;
-		const assignmentRows = [];
-		section.assignments.forEach((a) => {
-			const row = document.createElement("tr");
-			row.innerHTML = `<td>&nbsp;</td><td>&nbsp;</td><td>${a.title}</td><td>${a.score}</td><td>${a.outOf}</td>`;
-			assignmentRows.push(row);
-		});
-
-			let emptyRow = document.createElement("tr");
-			emptyRow.innerHTML = "<td>&nbsp;</td>";
-		bodyRows.push(sectionRow, ...assignmentRows, emptyRow);
+		let sectionInfo = [section.name, section.weight];
+		let assignmentRows = section.assignments.map((a) => [null, null, a.title, a.score, a.outOf])
+		bodyRows.push(sectionInfo, ...assignmentRows, []);
 	});
-	const table = document.createElement("table");
-	table.appendChild(headerRow);
-	bodyRows.forEach((r) => table.appendChild(r));
-	table.id = "gradebook-table";
-
-	document.body.appendChild(table);
-
-	let workbook = XLSX.utils.table_to_book(table);
+	
+	const worksheet = XLSX.utils.aoa_to_sheet(bodyRows);
+	const workbook = XLSX.utils.book_new()
+	XLSX.utils.book_append_sheet(workbook, worksheet, "Gradebook")
 	XLSX.writeFile(workbook, "gradebook.xlsx");
 }
 
