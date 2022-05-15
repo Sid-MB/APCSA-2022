@@ -74,12 +74,15 @@ function submit() {
 }
 
 function generateSpreadsheet(gradebook) {
-	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum", null, "Course Grade"];
+	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum", ""]
 
 	const bodyRows = [headerTitles];
 	gradebook.forEach((section) => {
-		let sectionInfo = [section.name, {t: "n", z: "0%", v: section.weight}];
-		let assignmentRows = section.assignments.map((a) => [null, null, a.title, a.score, a.outOf])
+		let sectionInfo = [section.name, { t: "n", z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
+		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair" } });
+		
+		let assignmentRows = section.assignments.map((a) => [null, null, a.title, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
+		
 
 		// Totaling function
 		const gradeCol = headerTitles.indexOf("Grade");
@@ -95,17 +98,29 @@ function generateSpreadsheet(gradebook) {
 		const maxRangeEncoded = XLSX.utils.encode_range(maxRange);
 
 		const func = { t: "n", z: "0.00%", f: `IFERROR(SUM(${gradeRangeEncoded})/SUM(${maxRangeEncoded}), "-")`, D: true };
-		let totalRow = [null, null, "TOTAL", func]
-		
+
+		let totalRow = [null, null, "Total", func]
+		totalRow = formattedCells(totalRow, { font: { italic: true }, fill: { fgColor: { rgb: "B7DEE8" } } });
 
 		bodyRows.push(sectionInfo, ...assignmentRows, totalRow, []);
 	});
 
 	// Course grade calc
 	const totalGradeFunc = { t: "n", z: "0.00%", f: `SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL"))`, D: false };
-	bodyRows[0].push(totalGradeFunc)
+
+	
+	bodyRows[0] = formattedCells(bodyRows[0], { font: { bold: true, sz: 14 }, border: { bottom: true } });
+	bodyRows[0].push(...formattedCells(["Course Grade"], { font: { sz: 18, bold: true }, border: { bottom: true } }));
+	bodyRows[0].push(...formattedCells([totalGradeFunc], { font: { sz: 18, color: { rgb: "00B050" }, bold: true }, border: {bottom: true} }));
+
+
 	
 	const worksheet = XLSX.utils.aoa_to_sheet(bodyRows);
+	console.log(worksheet["!cols"])
+	worksheet['!cols'] = [
+		{wch: 10}, {wch: 10}, { wch: 60 }, {wch: 10}, {wch: 10}, {wch: 10}, { wpx: 114 }, {wpx: 106}
+	]
+	// console.log(worksheet);
 	const workbook = XLSX.utils.book_new()
 	XLSX.utils.book_append_sheet(workbook, worksheet, "Gradebook")
 	XLSX.writeFile(workbook, "gradebook.xlsx");
@@ -120,6 +135,27 @@ function paste(event) {
 
 	submit();
 }
+
+let formattedCells = (cells, format) => {
+	return cells.map((cell) => {
+		if (cell == null) {
+			return cell;
+		}
+
+		if (typeof cell == "string" || typeof cell == "number") {
+			return {
+				t: (typeof cell).charAt(0),
+				v: cell,
+				s: format,
+			};
+		}
+
+		cell["s"] = { ...cell["s"], ...format };
+		return cell;
+	})
+}
+	
+	
 
 // DEBUG
 // debugOutput()
