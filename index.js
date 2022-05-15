@@ -97,7 +97,7 @@ function generateSpreadsheet(gradebook) {
 		const gradeRangeEncoded = XLSX.utils.encode_range(gradeRange); // Encoding converts from numbers to A1 notation
 		const maxRangeEncoded = XLSX.utils.encode_range(maxRange);
 
-		const func = { t: "n", z: "0.00%", f: `IFERROR(SUM(${gradeRangeEncoded})/SUM(${maxRangeEncoded}), "-")`, D: true };
+		const func = { t: "n", z: "0.00%", f: `IFERROR(SUMIFS(${gradeRangeEncoded},${gradeRangeEncoded},">=0",${maxRangeEncoded}, ">=0")/SUMIFS(${maxRangeEncoded},${gradeRangeEncoded},">=0",${maxRangeEncoded}, ">=0"), "-")`, D: true }; // SUMIFS ensures that grades where any component is marked with a '-' are not counted.
 
 		let totalRow = [null, null, "Total", func]
 		totalRow = formattedCells(totalRow, { font: { italic: true }, fill: { fgColor: { rgb: "B7DEE8" } } });
