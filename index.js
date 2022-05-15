@@ -82,7 +82,7 @@ function generateSpreadsheet(gradebook) {
 		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair"  }, alignment: {wrapText: true} });
 		
 		let assignmentRows = section.assignments.map((a) => [null, null, a.title, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
-		
+		assignmentRows.push([]) // Empty row so people can add their own assignments
 
 		// Totaling function
 		const gradeCol = headerTitles.indexOf("Grade");
