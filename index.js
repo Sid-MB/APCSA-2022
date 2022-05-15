@@ -79,7 +79,7 @@ function generateSpreadsheet(gradebook) {
 	const bodyRows = [headerTitles];
 	gradebook.forEach((section) => {
 		let sectionInfo = [section.name, { t: "n", z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
-		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair" } });
+		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair"  }, alignment: {wrapText: true} });
 		
 		let assignmentRows = section.assignments.map((a) => [null, null, a.title, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
 		
@@ -118,7 +118,7 @@ function generateSpreadsheet(gradebook) {
 	const worksheet = XLSX.utils.aoa_to_sheet(bodyRows);
 	console.log(worksheet["!cols"])
 	worksheet['!cols'] = [
-		{wch: 10}, {wch: 10}, { wch: 60 }, {wch: 10}, {wch: 10}, {wch: 10}, { wpx: 114 }, {wpx: 106}
+		{wpx: 150}, {wch: 10}, { wch: 60 }, {wch: 10}, {wch: 10}, {wch: 10}, { wpx: 114 }, {wpx: 106}
 	]
 	// console.log(worksheet);
 	const workbook = XLSX.utils.book_new()
