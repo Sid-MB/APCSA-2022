@@ -18,8 +18,8 @@ function submit() {
 	let allTitles = allLines.map((e) => e.querySelector(".title").childNodes[0]);
 	// console.log(allTitles);
 
-	let gradebook = []
-		/*[
+	let gradebook = [];
+	/*[
 		{
 			name: "",
 			weight: "5%",
@@ -38,7 +38,7 @@ function submit() {
 
 	const gradeColumn = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .awarded-grade")).map((e) => e.textContent);
 	const sectionGradePercents = gradeColumn.filter((e) => e.includes("%"));
-	const awardedGrades = gradeColumn.filter((e) => !e.includes("%"));
+	const awardedGrades = gradeColumn.filter((e) => !e.includes("%")).map((e) => e.match(/[\d\.]+/)[0]);
 
 	const outOfGrades = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .max-grade")).map((e) => e.textContent.slice(2));
 
@@ -54,41 +54,46 @@ function submit() {
 	allTitles.forEach((e) => {
 		// console.log(e);
 		if (e.childNodes.length == 0) {
-			gradebook.push({ name: e.textContent, weight: Number.parseFloat(sectionWeights[sectionIndex])/100, assignments: [] });
+			let weight = Number.parseFloat(sectionWeights[sectionIndex]) / 100;
+
+			if (Number.isNaN(weight)) {
+				weight = "-";
+			}
+			gradebook.push({ name: e.textContent, weight: weight, assignments: [] });
 			sectionIndex++;
 		} else {
 			const assignment = {
 				title: e.childNodes[0].textContent,
-				score: (awardedGrades[assignIndex] == undefined ? "-" : Number.parseFloat(awardedGrades[assignIndex])),
-				outOf: (outOfGrades[assignIndex] == undefined ? "-" : Number.parseFloat(outOfGrades[assignIndex])),
+				score: awardedGrades[assignIndex] == undefined ? "-" : Number.parseFloat(awardedGrades[assignIndex]),
+				outOf: outOfGrades[assignIndex] == undefined ? "-" : Number.parseFloat(outOfGrades[assignIndex]),
 			};
 			gradebook[gradebook.length - 1].assignments.push(assignment);
 			assignIndex++;
 		}
 	});
 
-	gradebook = gradebook.filter((section) => (section.weight != 0 && section.name !== gradingPeriodName))
+	gradebook = gradebook.filter((section) => section.weight != 0 && section.name !== gradingPeriodName);
 
 	console.log(gradebook);
-	generateSpreadsheet(gradebook)
+	generateSpreadsheet(gradebook);
 }
 
 function generateSpreadsheet(gradebook) {
-	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum", ""]
+	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum", ""];
 
 	const bodyRows = [headerTitles];
 	gradebook.forEach((section) => {
-		let sectionInfo = [section.name, { t: "n", z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
-		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair"  }, alignment: {wrapText: true} });
-		
-		let assignmentRows = section.assignments.map((a) => [null, null, a.title, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
-		assignmentRows.push([]) // Empty row so people can add their own assignments
+		let sectionInfo = [section.name, { t: (typeof section.weight).charAt(0), z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
+		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair" }, alignment: { wrapText: true } });
+
+		let assignmentRows = section.assignments.map((a) => [null, null, { t: "n", v: a.title, s: { alignment: { wrapText: true } } }, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
+		assignmentRows.push([]); // Empty row so people can add their own assignments
 
 		// Totaling function
 		const gradeCol = headerTitles.indexOf("Grade");
 		const maxCol = headerTitles.indexOf("Maximum");
 
-		const startRow = bodyRows.length + 1
+		const startRow = bodyRows.length + 1;
 		const endRow = startRow + assignmentRows.length - 1;
 
 		const gradeRange = { s: { r: startRow, c: gradeCol }, e: { r: endRow, c: gradeCol } };
@@ -99,7 +104,7 @@ function generateSpreadsheet(gradebook) {
 
 		const func = { t: "n", z: "0.00%", f: `IFERROR(SUMIFS(${gradeRangeEncoded},${gradeRangeEncoded},">=0",${maxRangeEncoded}, ">=0")/SUMIFS(${maxRangeEncoded},${gradeRangeEncoded},">=0",${maxRangeEncoded}, ">=0"), "-")`, D: true }; // SUMIFS ensures that grades where any component is marked with a '-' are not counted.
 
-		let totalRow = [null, null, "Total", func]
+		let totalRow = [null, null, "Total", func];
 		totalRow = formattedCells(totalRow, { font: { italic: true }, fill: { fgColor: { rgb: "B7DEE8" } } });
 
 		bodyRows.push(sectionInfo, ...assignmentRows, totalRow, []);
@@ -108,21 +113,16 @@ function generateSpreadsheet(gradebook) {
 	// Course grade calc
 	const totalGradeFunc = { t: "n", z: "0.00%", f: `SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL"))`, D: false };
 
-	
 	bodyRows[0] = formattedCells(bodyRows[0], { font: { bold: true, sz: 14 }, border: { bottom: true } });
 	bodyRows[0].push(...formattedCells(["Course Grade"], { font: { sz: 18, bold: true }, border: { bottom: true } }));
-	bodyRows[0].push(...formattedCells([totalGradeFunc], { font: { sz: 18, color: { rgb: "00B050" }, bold: true }, border: {bottom: true} }));
+	bodyRows[0].push(...formattedCells([totalGradeFunc], { font: { sz: 18, color: { rgb: "00B050" }, bold: true }, border: { bottom: true } }));
 
-
-	
 	const worksheet = XLSX.utils.aoa_to_sheet(bodyRows);
-	console.log(worksheet["!cols"])
-	worksheet['!cols'] = [
-		{wpx: 150}, {wch: 10}, { wch: 60 }, {wch: 10}, {wch: 10}, {wch: 10}, { wpx: 114 }, {wpx: 106}
-	]
+	console.log(worksheet["!cols"]);
+	worksheet["!cols"] = [{ wpx: 150 }, { wch: 10 }, { wch: 60 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wpx: 114 }, { wpx: 106 }];
 	// console.log(worksheet);
-	const workbook = XLSX.utils.book_new()
-	XLSX.utils.book_append_sheet(workbook, worksheet, "Gradebook")
+	const workbook = XLSX.utils.book_new();
+	XLSX.utils.book_append_sheet(workbook, worksheet, "Gradebook");
 	XLSX.writeFile(workbook, "gradebook.xlsx");
 }
 
