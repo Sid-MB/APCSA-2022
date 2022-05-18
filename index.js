@@ -111,7 +111,7 @@ function generateSpreadsheet(gradebook) {
 	});
 
 	// Course grade calc
-	const totalGradeFunc = { t: "n", z: "0.00%", f: `SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL"))`, D: false };
+	const totalGradeFunc = { t: "n", z: "0.00%", f: `IFERROR(SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL")), (SUM(D:D)-SUM(_xlfn.FILTER(D:D, C:C="TOTAL")))/SUM(E:E))`, D: false };
 
 	bodyRows[0] = formattedCells(bodyRows[0], { font: { bold: true, sz: 14 }, border: { bottom: true } });
 	bodyRows[0].push(...formattedCells(["Course Grade"], { font: { sz: 18, bold: true }, border: { bottom: true } }));
