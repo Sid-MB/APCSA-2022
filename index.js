@@ -86,7 +86,7 @@ function generateSpreadsheet(gradebook) {
 		let sectionInfo = [section.name, { t: (typeof section.weight).charAt(0), z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
 		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair" }, alignment: { wrapText: true } });
 
-		let assignmentRows = section.assignments.map((a) => [null, null, { t: "n", v: a.title, s: { alignment: { wrapText: true } } }, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
+		let assignmentRows = section.assignments.map((a) => [null, null, { t: "s", v: a.title, s: { alignment: { wrapText: true } } }, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
 		assignmentRows.push([]); // Empty row so people can add their own assignments
 
 		// Totaling function
