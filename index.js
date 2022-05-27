@@ -72,14 +72,14 @@ function submit() {
 		}
 	});
 
-	gradebook = gradebook.filter((section) => section.weight != 0 && section.name !== gradingPeriodName);
+	gradebook = gradebook.filter((section) => section.weight !== 0 && section.name !== gradingPeriodName);
 
 	console.log(gradebook);
 	generateSpreadsheet(gradebook);
 }
 
 function generateSpreadsheet(gradebook) {
-	const headerTitles = ["Section", "Weight", "Assignment", "Grade", "Maximum", ""];
+	const headerTitles = ["Category", "Weight", "Assignment", "Grade", "Maximum", ""];
 
 	const bodyRows = [headerTitles];
 	gradebook.forEach((section) => {
@@ -111,7 +111,10 @@ function generateSpreadsheet(gradebook) {
 	});
 
 	// Course grade calc
-	const totalGradeFunc = { t: "n", z: "0.00%", f: `IFERROR(SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL")), (SUM(D:D)-SUM(_xlfn.FILTER(D:D, C:C="TOTAL")))/SUM(E:E))`, D: false };
+	let totalGradeFunc = { t: "n", z: "0.00%", f: `IFERROR(SUMPRODUCT(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)/SUM(IF(ISNUMBER(_xlfn.FILTER(D:D, C:C="TOTAL")), _xlfn.FILTER(B:B,ISNUMBER(B:B)), 0)), _xlfn.FILTER(D:D, C:C="TOTAL")), (SUM(D:D)-SUM(_xlfn.FILTER(D:D, C:C="TOTAL")))/SUM(E:E))`, D: false };
+	if (gradebook.filter((section) => section.weight === "-").length > 0) {
+		totalGradeFunc.c = [{ a: "Schoology Exporter", t: "Category weighting information couldn't be found, so a different formula is being used. It may not reflect your actual grade, but it should be close." }];
+	}
 
 	bodyRows[0] = formattedCells(bodyRows[0], { font: { bold: true, sz: 14 }, border: { bottom: true } });
 	bodyRows[0].push(...formattedCells(["Course Grade"], { font: { sz: 18, bold: true }, border: { bottom: true } }));
