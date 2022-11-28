@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Gradebook Magic</title>
 
     <!-- <script src="/debug.js"></script> -->
     <script lang="javascript" src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
     <script src="index.js" defer></script>
 
     <base href="https://app.schoology.com/" target="_blank">
+
+    <style>
+        * {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .content {
+            margin-inline-start: 10px;
+        }
+
+        footer > p {
+            margin-block: 0;
+        }
+    </style>
 </head>
+
 <body>
-    <textarea id="paste" ></textarea>
-    <button id="submit-button">Submit</button>
-    <div id="output">
-        
+    <div class="content">
+        <h1>Schoology Gradebook Magic ✨</h1>
+        <p>Navigate to the grades tab of the class you want to export, select-all (Ctrl+A or Command+A), and copy. Then, paste in the text box below.</p>
+        <p>The spreadsheet will be downloaded to your computer. It's editable and contains formulas that calculate and re-calculate your grade based on the values in the table.</p>
+        <textarea id="paste" placeholder="Paste here!"></textarea>
+        <button id="submit-button">Submit</button>
+        <div id="output">
+        </div>
+        <footer>
+            <p>By Siddharth</p>
+            <a href="mailto:24siddharthbh@piedmont.k12.ca.us">24siddharthbh@piedmont.k12.ca.us</a>
+            
+            <p></br><em>My 2022-23 APCSA final project</em></p>
+        </footer>
     </div>
 </body>
 </html>

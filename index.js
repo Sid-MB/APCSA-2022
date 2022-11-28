@@ -36,11 +36,23 @@ function submit() {
 	//allTitles.shift()
 	// allTitles = allTitles.filter((t) => t.textContent !== "(no grading period)" && t.textContent !== gradingPeriodName);
 
-	const gradeColumn = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .awarded-grade")).map((e) => e.textContent);
+	const gradeColumn = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .awarded-grade, .no-grade")).map((e) => e.textContent);
 	const sectionGradePercents = gradeColumn.filter((e) => e.includes("%"));
-	const awardedGrades = gradeColumn.filter((e) => !e.includes("%")).map((e) => e.match(/[\d\.]+/)[0]);
+	const awardedGrades = gradeColumn.filter((e) => !e.includes("%")).map((e) => {
+		if (e == "—") { // em dash character
+			return undefined
+		}
+		return e.match(/[\d\.]+/)[0]
+	});
+	console.log("Grade column", gradeColumn)
 
-	const outOfGrades = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .max-grade")).map((e) => e.textContent.slice(2));
+	const outOfGrades = Array.from(output.querySelectorAll(".grade-column > .td-content-wrapper > .max-grade, .no-grade")).map((e) => {
+		// console.log(e.textContent)
+		if (e.textContent == "—") { // em dash character
+			return undefined;
+		}
+		return e.textContent.slice(2)
+	});
 
 	//console.log(awardedGrades)
 	//console.log(outOfGrades)
@@ -86,7 +98,7 @@ function generateSpreadsheet(gradebook) {
 		let sectionInfo = [section.name, { t: (typeof section.weight).charAt(0), z: "0%", v: section.weight, s: { font: { color: { rgb: "777777" } } } }];
 		sectionInfo = formattedCells(sectionInfo, { border: { bottom: { color: { rgb: "CACACA" } }, style: "hair" }, alignment: { wrapText: true } });
 
-		let assignmentRows = section.assignments.map((a) => [null, null, { t: "s", v: a.title, s: { alignment: { wrapText: true } } }, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, a.outOf]);
+		let assignmentRows = section.assignments.map((a) => [null, null, { t: "s", v: a.title, s: { alignment: { wrapText: true } } }, { t: (typeof a.score).charAt(0), v: a.score, s: { font: { color: { rgb: "00B050" }, bold: true } } }, { t: (typeof a.score).charAt(0), v: a.outOf }]);
 		assignmentRows.push([]); // Empty row so people can add their own assignments
 
 		// Totaling function
